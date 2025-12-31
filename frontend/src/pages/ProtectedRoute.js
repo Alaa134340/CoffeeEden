@@ -1,6 +1,7 @@
 import { Navigate } from "react-router-dom";
 import { isAdminLoggedIn } from "../utils/auth";
 import { useEffect, useState } from "react";
+import API_URL from "../config";
 
 function ProtectedRoute({ children }) {
   const [isAdmin, setIsAdmin] = useState(null);
@@ -27,7 +28,7 @@ function ProtectedRoute({ children }) {
         return;
       }
 
-      const response = await fetch("http://localhost:5000/api/user-check", {
+      const response = await fetch(`${API_URL}/api/user-check`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",

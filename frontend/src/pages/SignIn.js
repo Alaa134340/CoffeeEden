@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import "../styles/Admin.css";
+import API_URL from "../config";
 
 function SignIn() {
   const [email, setEmail] = useState("");
@@ -18,7 +19,7 @@ function SignIn() {
     }
 
     try {
-      const response = await fetch("http://localhost:5000/api/auth/signin", {
+      const response = await fetch(`${API_URL}/api/auth/signin`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
