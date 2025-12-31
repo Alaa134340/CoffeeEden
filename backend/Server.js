@@ -11,7 +11,20 @@ app.use('/uploads', express.static('uploads'));
 
 // CORS configuration for production
 const corsOptions = {
-	origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+	origin: function (origin, callback) {
+		const allowedOrigins = [
+			'http://localhost:3000',
+			'https://coffeeeden-1.onrender.com',
+			'https://coffeeeden.onrender.com',
+			process.env.FRONTEND_URL
+		].filter(Boolean);
+		
+		if (!origin || allowedOrigins.includes(origin)) {
+			callback(null, true);
+		} else {
+			callback(new Error('Not allowed by CORS'));
+		}
+	},
 	credentials: true,
 	methods: ['GET', 'POST', 'PUT', 'DELETE'],
 	allowedHeaders: ['Content-Type', 'user-id']
