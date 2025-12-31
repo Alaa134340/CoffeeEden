@@ -26,3 +26,23 @@ CREATE TABLE event_signups (
     signup_date DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
+
+-- Menu table
+CREATE TABLE menu (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    price DECIMAL(10, 2) NOT NULL,
+    image VARCHAR(255),
+    category VARCHAR(100) NOT NULL
+);
+
+-- Events table
+CREATE TABLE events (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    image VARCHAR(255),
+    date DATE,
+    location VARCHAR(255)
+);

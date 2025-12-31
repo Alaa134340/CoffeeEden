@@ -1,0 +1,30 @@
+services:
+  - type: web
+    name: coffee-shop-backend
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DB_HOST
+        sync: false
+      - key: DB_USER
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: DB_NAME
+        value: coffeehaven
+      - key: FRONTEND_URL
+        value: https://YOUR_FRONTEND_URL_HERE
+
+  - type: web
+    name: coffee-shop-frontend
+    env: static
+    plan: free
+    buildCommand: npm run build
+    staticPublishPath: build
+    envVars:
+      - key: REACT_APP_API_URL
+        value: https://YOUR_BACKEND_URL_HERE

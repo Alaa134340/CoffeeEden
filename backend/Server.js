@@ -8,7 +8,16 @@ require('dotenv').config();
 const app = express();
 // Serve uploaded images statically
 app.use('/uploads', express.static('uploads'));
-app.use(cors());
+
+// CORS configuration for production
+const corsOptions = {
+	origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+	credentials: true,
+	methods: ['GET', 'POST', 'PUT', 'DELETE'],
+	allowedHeaders: ['Content-Type', 'user-id']
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 
 // MySQL connection setup - MUST BE BEFORE MIDDLEWARE
@@ -36,17 +45,28 @@ function authenticateUser(req, res, next) {
 		return next();
 	}
 	db.query('SELECT * FROM users WHERE id = ?', [userId], (err, results) => {
-		if (err || results.length === 0) {
+		if (err) {
+			console.error('Auth middleware error:', err);
+			req.user = null;
+			return next();
+		}
+		if (results.length === 0) {
+			console.log('User not found with id:', userId);
 			req.user = null;
 			return next();
 		}
 		req.user = results[0];
+		console.log('User authenticated:', req.user.username, 'is_admin:', req.user.is_admin);
 		next();
 	});
 }
 
 // Admin check middleware
 function checkAdmin(req, res, next) {
+	const userId = req.headers['user-id'];
+	console.log('checkAdmin - user-id header:', userId);
+	console.log('checkAdmin - req.user:', req.user);
+	
 	if (req.user && req.user.is_admin) {
 		return next();
 	}
@@ -180,13 +200,47 @@ app.post('/api/events', upload.single('image'), checkAdmin, (req, res) => {
 });
 
 // Update an event
-app.put('/api/events/:id', checkAdmin, (req, res) => {
-	const { id } = req.params;
-	const { name, description, date, location } = req.body;
-	db.query('UPDATE events SET name = ?, description = ?, date = ?, location = ? WHERE id = ?', [name, description, date, location, id], (err) => {
-		if (err) return res.status(500).json({ error: err });
-		res.json({ id, name, description, date, location });
-	});
+app.put('/api/events/:id', upload.single('image'), checkAdmin, (req, res) => {
+	try {
+		const { id } = req.params;
+		console.log('Raw req.body:', req.body);
+		console.log('req.file:', req.file);
+		
+		const name = req.body.name;
+		const description = req.body.description;
+		const image = req.file ? req.file.filename : null;
+
+		console.log('--- Update event request received ---');
+		console.log('ID:', id, 'Name:', name, 'Desc:', description, 'Image:', image);
+
+		if (!name || !description) {
+			return res.status(400).json({ error: 'Name and description are required' });
+		}
+
+		// Update with or without new image
+		if (image) {
+			db.query('UPDATE events SET name = ?, description = ?, image = ? WHERE id = ?', [name, description, image, id], (err, result) => {
+				if (err) {
+					console.error('Database error updating event with image:', err);
+					return res.status(500).json({ error: 'Database error: ' + err.message });
+				}
+				console.log('Event updated successfully with new image');
+				res.json({ id, name, description, image });
+			});
+		} else {
+			db.query('UPDATE events SET name = ?, description = ? WHERE id = ?', [name, description, id], (err, result) => {
+				if (err) {
+					console.error('Database error updating event:', err);
+					return res.status(500).json({ error: 'Database error: ' + err.message });
+				}
+				console.log('Event updated successfully');
+				res.json({ id, name, description });
+			});
+		}
+	} catch (error) {
+		console.error('Exception in update event:', error);
+		res.status(500).json({ error: 'Server error: ' + error.message });
+	}
 });
 
 // Delete an event
@@ -310,12 +364,22 @@ app.get('/api/event/signups', checkAdmin, (req, res) => {
 	});
 });
 
+// DEV ONLY: Set user as admin by id
+app.put('/api/dev/make-admin/:id', (req, res) => {
+	const { id } = req.params;
+	db.query('UPDATE users SET is_admin = 1 WHERE id = ?', [id], (err) => {
+		if (err) return res.status(500).json({ error: err });
+		res.json({ message: 'User is now admin', id });
+	});
+});
+
 // Example route
 app.get('/', (req, res) => {
 	res.send('Coffee Haven backend is running');
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-	console.log(`Server started on port http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+	console.log(`Server started on port ${PORT}`);
+	console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
 });

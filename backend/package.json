@@ -1,4 +1,15 @@
 {
+  "name": "coffee-shop-backend",
+  "version": "1.0.0",
+  "description": "Coffee Haven backend API",
+  "main": "Server.js",
+  "scripts": {
+    "start": "node Server.js",
+    "dev": "nodemon Server.js"
+  },
+  "engines": {
+    "node": "18.x"
+  },
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
