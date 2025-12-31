@@ -130,7 +130,12 @@ app.post('/api/event/signup', (req, res) => {
 app.get('/api/menu', (req, res) => {
 	db.query('SELECT * FROM menu', (err, results) => {
 		if (err) return res.status(500).json({ error: err });
-		res.json(results);
+		// Transform image filenames to full URLs
+		const menuWithImages = results.map(item => ({
+			...item,
+			image_path: item.image ? `/uploads/${item.image}` : null
+		}));
+		res.json(menuWithImages);
 	});
 });
 
@@ -138,7 +143,12 @@ app.get('/api/menu', (req, res) => {
 app.get('/api/events', (req, res) => {
 	db.query('SELECT * FROM events', (err, results) => {
 		if (err) return res.status(500).json({ error: err });
-		res.json(results);
+		// Transform image filenames to full URLs
+		const eventsWithImages = results.map(event => ({
+			...event,
+			image_path: event.image ? `/uploads/${event.image}` : null
+		}));
+		res.json(eventsWithImages);
 	});
 });
 
