@@ -2,5 +2,8 @@
   "dependencies": {
     "axios": "^1.13.2"
   },
+  "scripts": {
+    "build": "cd frontend && npm run build"
+  },
   "proxy": "http://localhost:5000"
 }
