@@ -1,0 +1,1 @@
+CREATE TABLE event_signups (id INT AUTO_INCREMENT PRIMARY KEY, user_id INT, age INT, event_name VARCHAR(255), signup_date DATETIME DEFAULT CURRENT_TIMESTAMP);
