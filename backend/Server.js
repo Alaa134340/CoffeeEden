@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const multer = require('multer');
 const mysql = require('mysql');
+require('dotenv').config();
 
 const app = express();
 // Serve uploaded images statically
@@ -12,10 +13,10 @@ app.use(express.json());
 
 // MySQL connection setup - MUST BE BEFORE MIDDLEWARE
 const db = mysql.createConnection({
-	host: 'localhost',
-	user: 'root', 
-	password: '', 
-	database: 'coffeehaven'
+	host: process.env.DB_HOST || 'localhost',
+	user: process.env.DB_USER || 'root', 
+	password: process.env.DB_PASSWORD || '', 
+	database: process.env.DB_NAME || 'coffeehaven'
 });
 
 db.connect((err) => {
