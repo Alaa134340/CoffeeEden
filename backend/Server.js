@@ -2,7 +2,7 @@
 const express = require('express');
 const cors = require('cors');
 const multer = require('multer');
-const mysql = require('mysql');
+const mysql = require('mysql2');
 require('dotenv').config();
 
 const app = express();
@@ -38,15 +38,24 @@ const db = mysql.createConnection({
 	host: process.env.DB_HOST || 'localhost',
 	user: process.env.DB_USER || 'root', 
 	password: process.env.DB_PASSWORD || '', 
-	database: process.env.DB_NAME || 'coffeehaven'
+	database: process.env.DB_NAME || 'coffeehaven',
+	port: process.env.DB_PORT || 3306,
+	connectTimeout: 30000,
+	enableKeepAlive: true,
+	keepAliveInitialDelayMs: 0
 });
 
 db.connect((err) => {
 	if (err) {
 		console.error('Error connecting to MySQL:', err);
+		// Retry connection after 5 seconds
+		setTimeout(() => {
+			console.log('Retrying MySQL connection...');
+			db.connect();
+		}, 5000);
 		return;
 	}
-	console.log('Connected to MySQL database coffeehaven');
+	console.log('Connected to MySQL database ' + process.env.DB_NAME);
 });
 
 // Simulated user authentication middleware (replace with real auth in production)
