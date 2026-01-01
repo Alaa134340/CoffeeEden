@@ -377,6 +377,27 @@ app.get('/api/event/signups', checkAdmin, (req, res) => {
 	});
 });
 
+// TEST ENDPOINT: Check database connection
+app.get('/api/test/users', (req, res) => {
+	db.query('SELECT * FROM users LIMIT 5', (err, results) => {
+		if (err) {
+			console.error('Error fetching users:', err);
+			return res.status(500).json({ error: err.message });
+		}
+		res.json({ count: results.length, data: results });
+	});
+});
+
+app.get('/api/test/menu', (req, res) => {
+	db.query('SELECT * FROM menu LIMIT 5', (err, results) => {
+		if (err) {
+			console.error('Error fetching menu:', err);
+			return res.status(500).json({ error: err.message });
+		}
+		res.json({ count: results.length, data: results });
+	});
+});
+
 // DEV ONLY: Set user as admin by id
 app.put('/api/dev/make-admin/:id', (req, res) => {
 	const { id } = req.params;
